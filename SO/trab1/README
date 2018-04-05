@@ -1,0 +1,15 @@
+Árvores de Processos
+O trabalho consiste na comparação de duas diferentes formas de criação de árvores binárias
+de processos através da chamada de sistema fork (ambiente).
+
+O programa recebe como parâmetro pela linha de comando (usar argc e argv) um número
+inteiro positivo não nulo (deve ser feito o teste de consistência da entrada fornecida). Este
+número corresponde à altura (h) de ambas árvores binárias (perfeitas) de processos a serem
+geradas.
+
+As duas árvores binárias a serem geradas se diferem quanto ao modos de criação, sendo estes,
+respectivamente:
+i) ‘branch’ A criação da árvore de altura h ocorre de maneira análoga a um percurso em pré-
+ordem. e
+ii) ‘livre’ A criação da árvore é realizada de uma maneira livre, ou seja, não há necessidade
+de espera pela criação de um branch para início de outro.
