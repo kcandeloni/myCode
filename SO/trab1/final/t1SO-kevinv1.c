@@ -59,7 +59,7 @@ int main(int argc, char **argv){
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	printf("-------------- Livre ---------------\n");
 	printf("n=0\tPID=%d (root)\n", getpid());
-	clock_gettime(CLOCK_MONOTONIC_RAW, &t0);	//comeca medir o tempo livre
+	clock_gettime(CLOCK_MONOTONIC_RAW, &t2);	//comeca medir o tempo livre
 	for(i=0;i<h;i++){
 		idP= fork();
 		if(idP<0){	//testa fork
@@ -110,10 +110,10 @@ int main(int argc, char **argv){
 	
 	// Escreve no arq livre
 	FILE *fp2;
-	fp1=fopen("tempLivre.txt","at"); // "at" - cont de onde estava
+	fp2=fopen("tempLivre.txt","at"); // "at" - cont de onde estava
     
 	if(fp2==NULL){
-    	printf("Erro na abertura do arquivo.\n");
+    	printf("Erro na abertura do arquivo 2.\n");
     	getchar();
 	}
         fprintf(fp2,"%f\n",(float)difTempo(t2, t3));

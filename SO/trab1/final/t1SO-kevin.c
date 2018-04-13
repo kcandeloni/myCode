@@ -37,7 +37,7 @@ void arvBranch(int h, pid_t idRoot){
 	else return;
 }
 
-void arvLivre(int h){
+void arvLivre(int h, pid_t idRoot){
 	pid_t idP;
 	int i;
 
@@ -81,7 +81,7 @@ int main(int argc, char **argv){
 	pid_t idP;
 	pid_t idRoot;
 
-	struct timespec t0, t1, t2, t4;
+	struct timespec t0, t1, t2, t3;
 	int i=0, estado, h= atoi(argv[1]);
 	
 	idRoot= getpid();
@@ -120,10 +120,10 @@ int main(int argc, char **argv){
 
 	// Escreve no arq livre
 	FILE *fp2;
-	fp1=fopen("tempLivre.txt","at"); // "at" - cont de onde estava
+	fp2=fopen("tempLivre.txt","at"); // "at" - cont de onde estava
     
 	if(fp2==NULL){
-    	printf("Erro na abertura do arquivo.\n");
+    	printf("Erro na abertura do arquivo 2.\n");
     	getchar();
 	}
         fprintf(fp2,"%f\n",(float)difTempo(t2, t3));
