@@ -1,4 +1,4 @@
-// Trabalho 1.5 (salvando o tempo em um arquivo p/ posterior análise) SO - branch
+// Trabalho 1 SO - Kevin Willian Candeloni
 #include<sys/types.h>
 #include<sys/wait.h>
 #include <stdio.h>
@@ -17,7 +17,7 @@ int main(int argc, char **argv){
 	pid_t idRoot;
 
 	struct timespec t0, t1, t2, t3;
-	int i, h= atoi(argv[1]);
+	int i, estado, h= atoi(argv[1]);
 	
 	idRoot= getpid();
 	
@@ -36,16 +36,16 @@ int main(int argc, char **argv){
 			exit(errno);
 		}
 		if(idP==0)printf("n=%d\tC[%d, %d]\n", i+1, getpid(), getppid());
-		else if(idP>0){	//se é o pai
-			wait(NULL);
+		if(idP>0){	//se é o pai
+			wait(&estado);
 			idP= fork();
 			if(idP<0){	//testa fork
 				printf("Erross 901\n\n");			
 				exit(errno);
 			}
 			if(idP==0)printf("n=%d\tC[%d, %d]\n", i+1, getpid(), getppid());
-			else if(idP>0){
-				wait(NULL);
+			if(idP>0){
+				wait(&estado);
 				i= h;
 			}
 		}
@@ -67,7 +67,7 @@ int main(int argc, char **argv){
 			exit(errno);
 		}
 		if(idP==0){printf("n=%d\tC[%d, %d]\n", i+1, getpid(), getppid());}
-		else if(idP>0){	//se é o pai
+		if(idP>0){	//se é o pai
 			//wait(NULL);
 			idP= fork();
 			if(idP<0){	//testa fork
@@ -75,16 +75,12 @@ int main(int argc, char **argv){
 				exit(errno);
 			}
 			if(idP==0){printf("n=%d\tC[%d, %d]\n", i+1, getpid(), getppid());}
-			else if(idP>0){
-				//wait(NULL);
+			if(idP>0){
+				wait(&estado);
+				wait(&estado);
 				i= h;
 			}
 		}
-	}
-	if(idP){//printf("n=%d\tEsperei[%d, %d]\n", i+1, getpid(), getppid());
-		//processo filho não executa
-		wait(NULL);
-		wait(NULL);
 	}
 	printf("\tT[%d, %d]\n", getpid(), getppid());
 	if(getpid()==idRoot){
@@ -93,8 +89,9 @@ int main(int argc, char **argv){
 	}
 	else exit(0);	
 
-	printf("Tempo Execucao 'Branch': %f seg\n\n", (float)difTempo(t0, t1));
+	printf("Tempo Execucao 'Branch': %f seg\n", (float)difTempo(t0, t1));
 	printf("Tempo Execucao 'Livre': %f seg\n", (float)difTempo(t2, t3));
+	printf("Fim PID=%d (root)\n", getpid());
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Escreve no arq branch
 	FILE *fp1;

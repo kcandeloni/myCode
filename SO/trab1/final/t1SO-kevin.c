@@ -9,25 +9,25 @@
 
 void arvBranch(int h, pid_t idRoot){
 	pid_t idP;
-	int i;
+	int i, estado;
 	
 	for(i=0;i<h;i++){
 		idP= fork();
 		if(idP<0){	//testa fork
-			printf("Erross 901\n\n");			
+			printf("Erro 901\n\n");			
 			exit(errno);
 		}
 		if(idP==0)printf("n=%d\tC[%d, %d]\n", i+1, getpid(), getppid());
 		else if(idP>0){	//se é o pai
-			wait(NULL);
+			wait(&estado);
 			idP= fork();
 			if(idP<0){	//testa fork
-				printf("Erross 901\n\n");			
+				printf("Erro 902\n\n");			
 				exit(errno);
 			}
 			if(idP==0)printf("n=%d\tC[%d, %d]\n", i+1, getpid(), getppid());
 			else if(idP>0){
-				wait(NULL);
+				wait(&estado);
 				i= h;
 			}
 		}
@@ -39,12 +39,12 @@ void arvBranch(int h, pid_t idRoot){
 
 void arvLivre(int h, pid_t idRoot){
 	pid_t idP;
-	int i;
+	int i, estado;
 
 	for(i=0;i<h;i++){
 		idP= fork();
 		if(idP<0){	//testa fork
-			printf("Erross 901\n\n");			
+			printf("Erro 901\n\n");			
 			exit(errno);
 		}
 		if(idP==0){printf("n=%d\tC[%d, %d]\n", i+1, getpid(), getppid());}
@@ -52,20 +52,16 @@ void arvLivre(int h, pid_t idRoot){
 			//wait(NULL);
 			idP= fork();
 			if(idP<0){	//testa fork
-				printf("Erross 901\n\n");			
+				printf("Erro 902\n\n");			
 				exit(errno);
 			}
 			if(idP==0){printf("n=%d\tC[%d, %d]\n", i+1, getpid(), getppid());}
 			else if(idP>0){
-				//wait(NULL);
+				wait(&estado);
+				wait(&estado);
 				i= h;
 			}
 		}
-	}
-	if(idP){//printf("n=%d\tEsperei[%d, %d]\n", i+1, getpid(), getppid());
-		//processo filho não executa
-		wait(NULL);
-		wait(NULL);
 	}
 	printf("\tT[%d, %d]\n", getpid(), getppid());
 	if(getpid()!=idRoot)exit(0);
@@ -106,7 +102,10 @@ int main(int argc, char **argv){
 
 	printf("Tempo Execucao 'Branch': %f seg\n\n", (float)difTempo(t0, t1));
 	printf("Tempo Execucao 'Livre': %f seg\n", (float)difTempo(t2, t3));
+	printf("Fim PID=%d (root)\n", getpid());
+	
 	// Escreve no arq o tempo do branch
+	/*	// utilizado para gerar a planilha com os tempos de execução
 	FILE *fp1;
 	fp1=fopen("tempBranch.txt","at"); // "at" - cont de onde estava
     
@@ -130,5 +129,10 @@ int main(int argc, char **argv){
 
 	fclose(fp2);
 	
+	//script sh para execução das 30 vezes
+	//for((loop=0;loop<30;loop++));do
+	//	./t1SO-kevin 3
+	//done
+	*/	
 	exit(0);
 }
