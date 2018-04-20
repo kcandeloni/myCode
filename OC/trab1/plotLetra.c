@@ -4,7 +4,7 @@ int main(){
 	//int matA[5][4]={0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1};
 	int cont;
 	
-	int p, l=0, c=0, matA[5][4];
+	int p, np, l=0, c=0, matA[5][4];
 
 	// Ler arq
 	FILE *fp1;
@@ -44,21 +44,19 @@ int main(){
 		cont+=500;
 	}
 	printf("letra:	.word	");
-	cont=0;
+	np=0;
 	for(int i=0;i<5;i++){
 		for(int j=0;j<4;j++){
 			if( matA[i][j] ){
-				if(matA[i][j]==1)printf("0, ");
-				else printf("%d, ", matA[i][j]);
-				cont++;
+				if(matA[i][j]==1){printf("0, ");np++;}
+				else {printf("%d, ", matA[i][j]);np++;}
 			}
 		}
 	}
-	while(cont!=13){
-		if(cont==12)printf("0");
-		else printf("0, ");
-		cont++;
-		}
+	while(np<14){
+		printf("0, ");
+		np++;
+	}
 	printf("\n");
 	}//if
 	}//while
