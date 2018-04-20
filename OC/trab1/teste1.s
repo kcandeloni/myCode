@@ -1,6 +1,8 @@
 .data
 dm:	# memória do bitmap display
 	.space  65536	# 128 * 128 * 4  largura x altura x bytes/pixel
+letraA:	.word	4, 4, 504, 12, 500, 4, 4, 4, 500, 12, 500, 12, 0
+letraB: .word	0, 4, 4, 504, 12, 500, 4, 4, 504, 12, 500, 4, 4
 .text
 main:
 	la $s5, dm
@@ -21,6 +23,13 @@ setRight:
 	beq $s5, $t1, setDesc_4		# verifica se chegou no end 65024
 	beq $s5, $t2, setDesc_n512	# verifica se chegou no end 65532
 	beq $s5, $t3, setDesc_n4	# verifica se chegou no end 508
+	###### testa letra
+	la $s5, dm	# ini EB
+	addi $s5, $s5, 2584	# seta ponto onde a letra vai começar a ser escrita
+	j setA 
+	la $s5, dm	# ini EB
+	addi $s5, $s5, 2608	# seta ponto onde a prox*(teste) letra vai começar a ser escrita
+	j setB
 	j theEnd	# sai do programa
 putPixiel:
 	sw $s1, 0($s5)	# pixel
@@ -34,6 +43,24 @@ setDesc_n512:
 setDesc_n4:
 	addi $s3, $zero, -4	# deslocamento para a linha superior
 	j iniCont
+setA:
+	la $t0, letraA	# $t0 <- endereço base do vetor a
+	addi $t1, $t0, 52
+	j setLetra
+setB:
+	la $t0, letraB	# $t0 <- endereço base do vetor a
+	addi $t1, $t0, 52
+	j setLetra	
+setLetra:
+	lw $t2, ($t0)
+        add $s5, $s5, $t2
+        jal putPixiel
+        addi $t0, $t0, 4
+	bne $t0, $t1, setLetra
+	la $s5, dm	# ini EB
+	addi $s5, $s5, 2608	# seta ponto onde a prox*(teste) letra vai começar a ser escrita
+	j setB	# teste
+	j theEnd 
 theEnd:
 	addi $v0, $zero, 17
 	addi $a0, $zero, 0
