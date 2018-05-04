@@ -30,169 +30,191 @@ letraZ:	.word	0, 4, 4, 4, 500, 516, 516, 504, 4, 4, 4, 0, 0, 0
 
 .text
 main:
-	la $s5, dm
-	li $s1, 0x0000FF00   # cor verde
-	sw $s1, 0($s5)       # pixel(0,0) verde (desnecessário?)
+	# $a0 = arumento deslocamento (direçao)
+	# $a1 = arumento tam da reta a ser setada (cont)
+	# $a2 = arumento cor da reta
+	# $a3 = EB (onde sera impresso )
+##################################################################################
+	la $s0, dm	# EB display
+	add $a3, $zero, $s0	# salva para passar como argumento
+	li $a2, 0x0000FF00   # cor verde
+	#sw $a3, 0($a2)       # pixel(0,0) verde (desnecessário?)
+# traça linas nos cantos da tela
+	addi $a1, $zero, 127	# tam da lina (tela inteira)
+	
+	addi $a0, $zero, 512	# seta deslocamento para baixo
+	jal setReta_test
+	addi $a0, $zero, 4	# seta deslocamento para direita
+	jal setReta_test
+	addi $a0, $zero, -512	# seta deslocamrnto para cima
+	jal setReta_test
+	addi $a0, $zero, -4	# seta deslocamrnto para esquerda 
+	jal setReta_test
+	
+setGallows:
+# desenah forca	
+	addi $a1, $zero, 58	# tam(linhas) da forca
+	addi $a0, $zero, 512	# deslocamento para baixo
+	addi $a3, $s0, 7800	# inicio da forca
+	jal setReta_test
+	
+# escreve GAME
+	addi $a3, $s0, 2700
+	jal setG
+	addi $a3, $s0, 2724
+	jal setA
+	addi $a3, $s0, 2748
+	jal setM
+	addi $a3, $s0, 2772
+	jal setE
+	
+	j theEnd	# sai do programa	
 
-	addi $t1, $s5, 65024	# final deslc lateral esq
-	addi $t2, $s5, 65532	# final deslc inferior
-	addi $t3, $s5, 508	# final deslc lateral dir
-	addi $s3, $zero, 512	# seta o deslocamento para uma linha(esq) vertical
+setReta_test:
+	# $a0 = arumento deslocamento (direçao)
+	# $a1 = arumento tam da reta a ser setada (cont)
+	# $a2 = arumento cor da reta
+	# $a3 = EB (onde sera impresso )
+################################################################################
+# prólogo:
+	addiu $sp, $sp, -8      # alteramos a pilha para receber um item
+	sw $ra, 0($sp)       # armazenamos na pilha o endereço de retorno
+	sw $s0, 4($sp)	# salva valor de $v0
+# corpo do procedimento             
+	add $s0, $zero, $a1	# salvamos o tam da reta para ser manipulado
+setReta:
+	jal putPixel 
+	add $a3, $a3, $a0	# soma o deslocamento da reta (direçao )
+	addi $s0, $s0, -1	# decrementa o cont 
+	bne $s0, $zero, setReta	# verifica se ja cheou no final
+# epílogo   
+	lw $ra, 0($sp)      # recuperamos da pilha o endereço de retorno
+	lw $s0, 4($sp)	# restaura valor de $s0
+	addiu $sp, $sp, 8       # restauramos a pilha
+	jr $ra	# retorna ao procedimento chamador
+################################################################################	
 	
-iniCont:
-	addi $s4, $zero, 127	# inicializa o contador com o n de linhas do display
-	
-setRight:
-	add $s5, $s5, $s3	# deslocamento da reta EB= EB + deslLinha($t6)
-	jal putPixiel
-	subi $s4, $s4, 1	# cont--
-	bne $s4, $zero, setRight	# continua preenchendo a linha até que cont($t4) == 0
-	beq $s5, $t1, setDesc_4		# verifica se chegou no end 65024
-	beq $s5, $t2, setDesc_n512	# verifica se chegou no end 65532
-	beq $s5, $t3, setDesc_n4	# verifica se chegou no end 508
+	 
 	###### testa letra
-	la $s5, dm	# ini EB
-	addi $s5, $s5, 2584	# seta ponto onde a letra vai começar a ser escrita
-	j setA 
-	la $s5, dm	# ini EB
-	addi $s5, $s5, 2608	# seta ponto onde a prox*(teste) letra vai começar a ser escrita
-	j setB
-	j theEnd	# sai do programa
+	#ori $v0, $zero, 32	#teste		# Syscall sleep
+	#ori $a0, $zero, 60	#teste		# For this many miliseconds
+	#syscall	#teste
 	
-putPixiel:
-	sw $s1, 0($s5)	# pixel no end cont em $s5 com a cor em $s1
+	#lw $t0, 0xFFFF0004	#teste		# Load input value
+
+testa_letra:	#teste
+	#beq, $t0, 100, theEnd	#teste = d
+	
+	#beq $t0, 97, setA
+
+putPixel:
+	sw $a2, 0($a3)	# pixel no end cont em $a3 com a cor em $a2
 	jr $ra
 	
-setDesc_4:
-	addi $s3, $zero, 4 	# deslocamento para a linha inferior
-	j iniCont
-	
-setDesc_n512:
-	addi $s3, $zero, -512	# deslocamento para a linha lateral dir
-	j iniCont
-	
-setDesc_n4:
-	addi $s3, $zero, -4	# deslocamento para a linha superior
-	j iniCont
+putLetra:
+	# $a0 = EB do vetor da letra
+	# $a2 = argumento cor da reta
+	# $a3 = EB (onde sera impresso )
+################################################################################
+# prólogo:
+	addiu $sp, $sp, -8      # alteramos a pilha para receber um item
+	sw $ra, 0($sp)       # armazenamos na pilha o endereço de retorno
+	sw $s0, 4($sp)	# salva valor de $s0
+# corpo do procedimento             
+	addi $s0, $zero, 14	# salvamos o tam da reta para ser manipulad
+putLetra_r:
+	lw $s1, ($a0)	# carrega o valor do deslocamento do proximo pixel da letra 
+	add $a3, $a3, $s1	# calcula a posição do pixel da letra
+	jal putPixel
+	addi $a0, $a0, 4	# pega a prox posicao do verot
+	addi $s0, $s0, -1	# decrementa o cont 
+	bne $s0, $zero, putLetra_r	# verifica se ja cheou no final
+# epílogo   
+	lw $ra, 0($sp)      # recuperamos da pilha o endereço de retorno
+	lw $s0, 4($sp)	# restaura valor de $s0
+	addiu $sp, $sp, 8       # restauramos a pilha
+	jr $ra	# retorna ao procedimento chamador
+################################################################################
 
-setFim_letra:
-	addi $t1, $t0, 56	# seta qual é fim do vetor(letra)
-	j setLetra	# manda imprimir a letra que foi carregada em t0
-setLetra:
-	lw $t2, ($t0)	# carrega o valor do deslocamento do proximo pixiel da letra 
-        add $s5, $s5, $t2	# calcula a posição do pixiel da letra
-        jal putPixiel	# imprime o priel na tela
-        addi $t0, $t0, 4	# pega o proximo prixiel da letra
-	bne $t0, $t1, setLetra	# testa se já chegou ao fim da letra
-	###
-	la $s5, dm	# ini EB
-	addi $s5, $s5, 2608	# seta ponto onde a prox*(teste) letra vai começar a ser escrita
-	j setB	# teste
-	j theEnd
 ###	# carrega os vetores das letras
 setA:
-	la $t0, letraA	# $t0 <- endereço base do vetor a
-	j setFim_letra
-	
+	la $a0, letraA	# $t0 <- endereço base do vetor a
+	j putLetra
 setB:
-	la $t0, letraB	# $t0 <- endereço base do vetor b
-	j setFim_letra
-
+	la $a0, letraB	# $t0 <- endereço base do vetor b
+	j putLetra
 setC:
-	la $t0, letraC	# $t0 <- endereço base do vetor c
-	j setFim_letra
-
+	la $a0, letraC	# $t0 <- endereço base do vetor c
+	j putLetra
 setD:
-	la $t0, letraD	# $t0 <- endereço base do vetor d
-	j setFim_letra
-
+	la $a0, letraD	# $t0 <- endereço base do vetor d
+	j putLetra
 setE:
-	la $t0, letraE	# $t0 <- endereço base do vetor e
-	j setFim_letra
-
+	la $a0, letraE	# $t0 <- endereço base do vetor e
+	j putLetra
 setF:
-	la $t0, letraF	# $t0 <- endereço base do vetor f
-	j setFim_letra
-
+	la $a0, letraF	# $t0 <- endereço base do vetor f
+	j putLetra
 setG:
-	la $t0, letraG	# $t0 <- endereço base do vetor g
-	j setFim_letra
-
+	la $a0, letraG	# $t0 <- endereço base do vetor g
+	j putLetra
 setH:
-	la $t0, letraH	# $t0 <- endereço base do vetor h
-	j setFim_letra
-
+	la $a0, letraH	# $t0 <- endereço base do vetor h
+	j putLetra
 setI:
-	la $t0, letraI	# $t0 <- endereço base do vetor i
-	j setFim_letra
-
+	la $a0, letraI	# $t0 <- endereço base do vetor i
+	j putLetra
 setJ:
-	la $t0, letraJ	# $t0 <- endereço base do vetor j
-	j setFim_letra
-
+	la $a0, letraJ	# $t0 <- endereço base do vetor j
+	j putLetra
 setK:
-	la $t0, letraK	# $t0 <- endereço base do vetor k
-	j setFim_letra
-
+	la $a0, letraK	# $t0 <- endereço base do vetor k
+	j putLetra
 setL:
-	la $t0, letraL	# $t0 <- endereço base do vetor l
-	j setFim_letra
-
+	la $a0, letraL	# $t0 <- endereço base do vetor l
+	j putLetra
 setM:
-	la $t0, letraM	# $t0 <- endereço base do vetor m
-	j setFim_letra
-
+	la $a0, letraM	# $t0 <- endereço base do vetor m
+	j putLetra
 setN:
-	la $t0, letraN	# $t0 <- endereço base do vetor n
-	j setFim_letra
-
+	la $a0, letraN	# $t0 <- endereço base do vetor n
+	j putLetra
 setO:
-	la $t0, letraO	# $t0 <- endereço base do vetor o
-	j setFim_letra
-
+	la $a0, letraO	# $t0 <- endereço base do vetor o
+	j putLetra
 setP:
-	la $t0, letraP	# $t0 <- endereço base do vetor p
-	j setFim_letra
-
+	la $a0, letraP	# $t0 <- endereço base do vetor p
+	j putLetra
 setQ:
-	la $t0, letraQ	# $t0 <- endereço base do vetor q
-	j setFim_letra
-
+	la $a0, letraQ	# $t0 <- endereço base do vetor q
+	j putLetra
 setR:
-	la $t0, letraR	# $t0 <- endereço base do vetor r
-	j setFim_letra
-
+	la $a0, letraR	# $t0 <- endereço base do vetor r
+	j putLetra
 setS:
-	la $t0, letraS	# $t0 <- endereço base do vetor s
-	j setFim_letra
-
+	la $a0, letraS	# $t0 <- endereço base do vetor s
+	j putLetra
 setT:
-	la $t0, letraT	# $t0 <- endereço base do vetor t
-	j setFim_letra
-
+	la $a0, letraT	# $t0 <- endereço base do vetor t
+	j putLetra
 setU:
-	la $t0, letraU	# $t0 <- endereço base do vetor u
-	j setFim_letra
-
+	la $a0, letraU	# $t0 <- endereço base do vetor u
+	j putLetra
 setV:
-	la $t0, letraV	# $t0 <- endereço base do vetor v
-	j setFim_letra
-
+	la $a0, letraV	# $t0 <- endereço base do vetor v
+	j putLetra
 setW:
-	la $t0, letraW	# $t0 <- endereço base do vetor w
-	j setFim_letra
-
+	la $a0, letraW	# $t0 <- endereço base do vetor w
+	j putLetra
 setX:
-	la $t0, letraX	# $t0 <- endereço base do vetor x
-	j setFim_letra
-
+	la $a0, letraX	# $t0 <- endereço base do vetor x
+	j putLetra
 setY:
-	la $t0, letraY	# $t0 <- endereço base do vetor y
-	j setFim_letra
-
+	la $a0, letraY	# $t0 <- endereço base do vetor y
+	j putLetra
 setZ:
-	la $t0, letraZ	# $t0 <- endereço base do vetor z
-	j setFim_letra
+	la $a0, letraZ	# $t0 <- endereço base do vetor z
+	j putLetra
 ###	 
 theEnd:
 	addi $v0, $zero, 17
